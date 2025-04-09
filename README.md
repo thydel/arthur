@@ -64,7 +64,6 @@ mkdir -p tmp/$list/jpg
 ### Generate request for all thumbnails from summaries
 
 ```bash
-jq='select(has("thumbnail")) | "curl -s \(.thumbnail.source) -o \"\($list)/\(.title | sub(" "; "_"; "g")).jpg\""'
 jq='select(has("thumbnail")) | "curl -s \(.thumbnail.source) -o \"\($list)/jpg/\(.titles.canonical).jpg\""'
 
 < tmp/$list-4.js jq "$jq" --arg list tmp/$list -r > tmp/$list-5.sh
