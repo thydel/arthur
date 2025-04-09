@@ -51,7 +51,7 @@ jq+='| capture("href=..(?<href>[^\"]+).*title=.(?<title>[^\"]+)")'
 ```bash
 jq='"curl -sLH \"\($ua)\" \($url)/api/rest_v1/page/summary/\($q)\((.href / "/")[-1])\($q)"'
 
-mkdir -p tmp/$list
+mkdir -p tmp/$list/jpg
 < tmp/$list-2.js jq "$jq" -r --arg ua "$UA" --arg url $url --arg q "'" > tmp/$list-3.sh
 ```
 
@@ -65,6 +65,7 @@ mkdir -p tmp/$list
 
 ```bash
 jq='select(has("thumbnail")) | "curl -s \(.thumbnail.source) -o \"\($list)/\(.title | sub(" "; "_"; "g")).jpg\""'
+jq='select(has("thumbnail")) | "curl -s \(.thumbnail.source) -o \"\($list)/jpg/\(.titles.canonical).jpg\""'
 
 < tmp/$list-4.js jq "$jq" --arg list tmp/$list -r > tmp/$list-5.sh
 ```
@@ -78,7 +79,7 @@ jq='select(has("thumbnail")) | "curl -s \(.thumbnail.source) -o \"\($list)/\(.ti
 ### Generate a MD file
 
 ```bash
-jq='select(has("thumbnail")) | "# \(.title)", "", .extract, "", "![\(.title)](\(.title | sub(" "; "_"; "g")).jpg)", ""'
+jq='"# \(.title)", "", .extract, if has("thumbnail") then "", "![\(.title)](jpg/\(.titles.canonical).jpg)" else empty end, ""'
 
 < tmp/$list-4.js jq "$jq" -r > tmp/$list/README.md
 ```
