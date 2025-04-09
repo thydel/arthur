@@ -46,7 +46,7 @@ jq+='| capture("href=..(?<href>[^\"]+).*title=.(?<title>[^\"]+)")'
 < tmp/$list-1.js jq -r .parse.text | jq -Rn "$jq" > tmp/$list-2.js
 ```
 
-### Generate requests fromm list
+### Generate requests from list
 
 ```bash
 jq='"curl -sLH \"\($ua)\" \($url)/api/rest_v1/page/summary/\($q)\((.href / "/")[-1])\($q)"'
@@ -61,10 +61,31 @@ mkdir -p mkdir -p tmp/$list
 < tmp/$list-3.sh bash | jq > tmp/$list-4.js
 ```
 
+### Generate request for all thumbnails from summaries
+
+```bash
+jq='select(has("thumbnail")) | "curl -s \(.thumbnail.source) -o \"\($list)/\(.title).jpg\""'
+
+< tmp/$list-4.js jq "$jq" --arg list tmp/$list -r > tmp/$list-5.sh
+```
+
 ### Get all Thumbnails
 
 ```bash
-jq='select(has("thumbnail")) | "curl -so \"\(.title.jpg)\" \(.thumbnail.source)"'
+< tmp/$list-5.sh bash
+```
 
-< tmp/$list-4.js jq "$jq" -r
+### Generate a MD file
+
+```bash
+jq='select(has("thumbnail")) | "# \(.title)", "", .extract, "", "![\(.title)](\(.title).jpg)", ""'
+
+< tmp/$list-4.js jq "$jq" -r > tmp/$list/$list.md
+```
+
+### Keep MD and JPG
+
+```bash
+mkdir -p out
+mv tmp/$list out
 ```
